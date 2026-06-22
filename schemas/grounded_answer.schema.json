@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jakemorganlabs.com/schemas/grounded_answer.schema.json",
+  "title": "GroundedAnswer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "answer", "citations"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["answered", "insufficient_evidence"]
+    },
+    "answer": { "type": "string", "maxLength": 1500 },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["chunk_id", "source", "snippet"],
+        "properties": {
+          "chunk_id": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "page": { "type": ["integer", "null"], "minimum": 1 },
+          "snippet": { "type": "string", "maxLength": 300 }
+        }
+      }
+    }
+  }
+}

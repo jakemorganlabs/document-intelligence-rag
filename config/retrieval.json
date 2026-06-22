@@ -1,0 +1,7 @@
+{
+  "version": "1.0",
+  "top_k": 6,
+  "distance": "cosine",
+  "similarity_floor": 0.30,
+  "max_context_chunks": 6
+}

@@ -1,0 +1,42 @@
+{
+  "name": "document-intelligence-rag",
+  "version": "1.0.0",
+  "description": "Document Intelligence — Grounded RAG with Citations. Portfolio Piece II (MICT-RAG-002).",
+  "keywords": [
+    "rag",
+    "citations",
+    "grounded-generation",
+    "document-intelligence",
+    "abstention"
+  ],
+  "author": "jakemorganlabs",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "migrate": "tsx scripts/migrate.ts",
+    "migrate:fresh": "tsx scripts/migrate-fresh.ts",
+    "lint": "eslint src/ tests/",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "@types/pg": "^8.11.11",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "eslint": "^9.20.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0",
+    "pg": "^8.14.0",
+    "tiktoken": "^1.0.0"
+  }
+}

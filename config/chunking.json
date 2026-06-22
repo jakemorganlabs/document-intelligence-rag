@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "target_tokens": 500,
+  "overlap_tokens": 50,
+  "boundary_pref": ["heading", "paragraph", "sentence"],
+  "min_chunk_tokens": 64,
+  "embed_model": "text-embedding-3-small",
+  "tokenizer": "cl100k_base"
+}
