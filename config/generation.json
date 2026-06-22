@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "provider": "google",
+  "model_id": "google/gemma-4-26B-A4B-it",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "structured_output": "tool_use"
+}

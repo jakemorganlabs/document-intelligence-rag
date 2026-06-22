@@ -8,6 +8,15 @@ An answer it cannot cite is an answer it must not give.
 
 [![CI](https://github.com/jakemorganlabs/document-intelligence-rag/actions/workflows/test.yml/badge.svg)](https://github.com/jakemorganlabs/document-intelligence-rag/actions/workflows/test.yml)
 
+## Model stack
+
+| Role | Provider | Model |
+|------|----------|-------|
+| **Generation (RAG answers)** | Google | `google/gemma-4-26B-A4B-it` |
+| **Embeddings** | OpenAI | `text-embedding-3-small` |
+
+Generation is pinned to **Google Gemma** — not Anthropic, Claude, or Haiku. See `config/generation.json` and `src/generation_config.ts`.
+
 ## What this session delivers
 
 Session S01 implements the deterministic half of the system — no model calls, no network:
@@ -47,7 +56,7 @@ npm test
 ## Project layout
 
 ```
-config/           Versioned chunking + retrieval parameters
+config/           Versioned chunking, retrieval, and generation parameters
 migrations/       Postgres schema (pgvector, HNSW index)
 schemas/          JSON Schema contracts (§11.1, §11.2)
 src/
