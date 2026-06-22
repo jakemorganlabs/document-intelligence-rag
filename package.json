@@ -21,6 +21,9 @@
     "test:watch": "vitest",
     "migrate": "tsx scripts/migrate.ts",
     "migrate:fresh": "tsx scripts/migrate-fresh.ts",
+    "ingest": "tsx scripts/ingest.ts",
+    "ingest:smoke": "bash scripts/ingest_smoke.sh",
+    "embed:pending": "tsx scripts/embed_pending.ts",
     "lint": "eslint src/ tests/",
     "typecheck": "tsc --noEmit"
   },
@@ -36,6 +39,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.0",
+    "openai": "^6.44.0",
     "pg": "^8.14.0",
     "tiktoken": "^1.0.0"
   }

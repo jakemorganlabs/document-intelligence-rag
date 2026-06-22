@@ -1,0 +1,227 @@
+/**
+ * Ingest orchestrator — file → extraction → chunking → embedding → persistence.
+ *
+ * Satisfies: FR-IG-1..6, FR-EM-1..4, FR-PS-1.
+ *
+ * Flow:
+ *   1. Read file bytes, compute SHA-256 content_hash.
+ *   2. Spawn sidecar to extract page-tagged text.
+ *   3. Idempotency check against documents.content_hash.
+ *   4. Chunk via S01 chunker.
+ *   5. Embed in batches (~100 per call), retry 3×.
+ *   6. On embed exhaustion → record chunks with NULL embedding; re-runnable.
+ *   7. Persist document + all chunks in single transaction.
+ *   8. Corrupt/bad files rejected without aborting batch.
+ */
+import { readFile } from "node:fs/promises";
+import type { PoolClient } from "pg";
+import { chunkDocument } from "./chunker.js";
+import { computeContentHash } from "./hash.js";
+import { extractFile, type ExtractionResult } from "./pdf_extractor.js";
+import { checkIdempotency } from "./idempotency.js";
+import { embedTexts, getEmbeddingConfigFromEnv } from "./embedder.js";
+import { persistIngest, replaceDocument, routeToDeadLetter } from "./vector_store.js";
+import type { ChunkInput, ChunkRecord } from "../types/index.js";
+
+export interface IngestOptions {
+  /** If true, replace existing document when hash matches (default: skip). */
+  replaceOnReingest?: boolean;
+  /** Override embedding config per-call. */
+  embedConfig?: Parameters<typeof embedTexts>[1];
+}
+
+export interface IngestResult {
+  documentId: string | null;
+  source: string;
+  status: "skipped" | "indexed" | "partial" | "failed";
+  pageCount: number;
+  chunksTotal: number;
+  chunksEmbedded: number;
+  chunksUnembedded: number;
+  reason?: string;
+}
+
+/**
+ * Ingest a single file (PDF, .txt, .md).
+ * Returns a result summary; never throws on known error conditions
+ * (corrupt files are returned with status "failed").
+ */
+export async function ingestFile(
+  filePath: string,
+  client: PoolClient,
+  options: IngestOptions = {}
+): Promise<IngestResult> {
+  const source = filePath;
+  let extraction: ExtractionResult;
+
+  /* ---------- Step 1: Read bytes & hash ---------- */
+  let buffer: Buffer;
+  try {
+    buffer = await readFile(filePath);
+  } catch (err) {
+    const msg = `Cannot read file: ${(err as Error).message}`;
+    await routeToDeadLetter(client, {
+      stage: "ingest",
+      itemType: "document",
+      itemSnapshot: { filePath },
+      error: msg,
+      errorCode: "FILE_READ_ERROR",
+    });
+    return {
+      documentId: null,
+      source,
+      status: "failed",
+      pageCount: 0,
+      chunksTotal: 0,
+      chunksEmbedded: 0,
+      chunksUnembedded: 0,
+      reason: msg,
+    };
+  }
+
+  const contentHash = computeContentHash(buffer);
+
+  /* ---------- Step 2: Extract text via sidecar ---------- */
+  try {
+    extraction = await extractFile(filePath);
+  } catch (err) {
+    const msg = `Extraction failed: ${(err as Error).message}`;
+    await routeToDeadLetter(client, {
+      stage: "ingest",
+      itemType: "document",
+      itemSnapshot: { filePath, contentHash },
+      error: msg,
+      errorCode: "EXTRACTION_ERROR",
+    });
+    return {
+      documentId: null,
+      source,
+      status: "failed",
+      pageCount: 0,
+      chunksTotal: 0,
+      chunksEmbedded: 0,
+      chunksUnembedded: 0,
+      reason: msg,
+    };
+  }
+
+  /* ---------- Step 3: Idempotency check ---------- */
+  const idem = await checkIdempotency(contentHash, client);
+  if (idem.action === "skip" && !options.replaceOnReingest) {
+    return {
+      documentId: idem.documentId ?? null,
+      source,
+      status: "skipped",
+      pageCount: extraction.page_count,
+      chunksTotal: 0,
+      chunksEmbedded: 0,
+      chunksUnembedded: 0,
+      reason: idem.reason,
+    };
+  }
+
+  /* ---------- Step 4: Chunk ---------- */
+  const chunkInput: ChunkInput = {
+    source: extraction.source,
+    contentHash,
+    documentId: idem.documentId ?? crypto.randomUUID(),
+    pages: extraction.pages.map((p) => ({
+      page: p.page,
+      text: p.text,
+    })),
+  };
+
+  const chunks = chunkDocument(chunkInput);
+
+  /* ---------- Step 5: Embed ---------- */
+  const textsToEmbed = chunks.map((c) => c.text);
+  const embedConfig = options.embedConfig ?? getEmbeddingConfigFromEnv();
+  let failedTexts = new Set<string>();
+  const embeddingByText = new Map<string, number[]>();
+
+  if (textsToEmbed.length > 0 && embedConfig.apiKey) {
+    const embedResult = await embedTexts(textsToEmbed, embedConfig);
+    for (const s of embedResult.succeeded) {
+      if (!embeddingByText.has(s.text)) {
+        embeddingByText.set(s.text, s.embedding);
+      }
+    }
+    for (const f of embedResult.failed) {
+      failedTexts.add(f);
+    }
+  } else if (textsToEmbed.length > 0) {
+    // No API key — record everything as un-embedded
+    for (const t of textsToEmbed) failedTexts.add(t);
+  }
+
+  /* ---------- Step 6: Build ChunkRecords ---------- */
+  const chunkRecords: ChunkRecord[] = chunks.map((c) => {
+    const isUnembedded = failedTexts.has(c.text);
+    const emb = isUnembedded ? null : (embeddingByText.get(c.text) ?? null);
+    return {
+      chunk_id: crypto.randomUUID(),
+      document_id: chunkInput.documentId,
+      content_hash: computeContentHash(Buffer.from(c.text)),
+      source: c.source,
+      page: c.page,
+      section: c.section,
+      chunk_index: c.chunk_index,
+      char_start: c.char_start,
+      char_end: c.char_end,
+      text: c.text,
+      token_count: c.token_count,
+      embedding: emb,
+      embed_model: isUnembedded ? null : (embedConfig.model ?? null),
+      embed_dims: emb?.length ?? null,
+      embedded_at: isUnembedded ? null : new Date().toISOString(),
+    };
+  });
+
+  /* ---------- Step 7: Persist ---------- */
+  let documentId: string;
+  let finalStatus: IngestResult["status"] = "indexed";
+
+  try {
+    if (idem.action === "skip" && options.replaceOnReingest) {
+      const res = await replaceDocument(idem.documentId!, { source: extraction.source, contentHash, pageCount: extraction.page_count, chunks: chunkRecords }, client);
+      documentId = res.documentId;
+    } else {
+      const res = await persistIngest({ source: extraction.source, contentHash, pageCount: extraction.page_count, chunks: chunkRecords }, client);
+      documentId = res.documentId;
+    }
+  } catch (err) {
+    const msg = `Persistence failed: ${(err as Error).message}`;
+    await routeToDeadLetter(client, {
+      stage: "ingest",
+      itemType: "document",
+      itemSnapshot: { filePath, contentHash, chunkCount: chunks.length },
+      error: msg,
+      errorCode: "PERSISTENCE_ERROR",
+    });
+    return {
+      documentId: null,
+      source,
+      status: "failed",
+      pageCount: extraction.page_count,
+      chunksTotal: chunks.length,
+      chunksEmbedded: 0,
+      chunksUnembedded: 0,
+      reason: msg,
+    };
+  }
+
+  if (failedTexts.size > 0) {
+    finalStatus = "partial";
+  }
+
+  return {
+    documentId,
+    source,
+    status: finalStatus,
+    pageCount: extraction.page_count,
+    chunksTotal: chunks.length,
+    chunksEmbedded: chunks.length - failedTexts.size,
+    chunksUnembedded: failedTexts.size,
+    reason: failedTexts.size > 0 ? `${failedTexts.size} chunks un-embedded (re-runnable)` : undefined,
+  };
+}
