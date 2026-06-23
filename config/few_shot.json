@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "answerable": {
+    "status": "answered",
+    "answer": "The horizontal permanent link is limited to 90 m of solid-conductor cabling. With patch and equipment cords, the total channel must not exceed 100 m.",
+    "citations": [
+      {
+        "chunk_id": "c-37",
+        "source": "Structured-Cabling-Standards-Handbook.pdf",
+        "page": 14,
+        "snippet": "limited to 90 m of solid-conductor cabling"
+      }
+    ]
+  },
+  "unanswerable": {
+    "status": "insufficient_evidence",
+    "answer": "I don't have enough information in the provided documents to answer that.",
+    "citations": []
+  }
+}

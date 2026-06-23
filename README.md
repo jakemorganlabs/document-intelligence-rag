@@ -131,13 +131,16 @@ scripts/
 
 | Command | Description |
 |---------|-------------|
-| `npm test` | Run unit tests + schema validation (S01 + S02) |
+| `npm test` | Run unit tests + schema validation (S01–S03) |
 | `npm run typecheck` | TypeScript compile check |
 | `npm run migrate` | Apply pending SQL migrations |
 | `npm run migrate:fresh` | Drop schema and re-apply all migrations |
 | `npm run ingest -- <path>` | Ingest a file or directory |
 | `npm run embed:pending` | Embed chunks where `embedding IS NULL` |
 | `npm run ingest:smoke` | Run full S02 smoke test suite |
+| `npm run query -- "<question>"` | Run a single query via CLI |
+| `npm run query:smoke` | Run S03 query pipeline smoke test |
+| `npm run serve` | Start HTTP query endpoint on PORT |
 
 ## S02 Acceptance Criteria
 
@@ -146,6 +149,46 @@ scripts/
 3. **Corrupt PDF tolerated** — one bad file in a batch doesn't abort the others (FR-IG-6)
 4. **Embedding failure handled** — failed chunks recorded as un-embedded; `scripts/embed_pending.ts` picks them up (FR-EM-4)
 5. **ANN queryable** — top-6 cosine similarity query returns results in <100 ms on ~100 chunks
+
+## S03 Acceptance Criteria
+
+1. **Answerable question returns cited answer** — status `answered` with ≥1 verified citation
+2. **Unanswerable question abstains** — status `insufficient_evidence` with empty citations; zero generation tokens
+3. **Broken citation triggers repair** — one re-call, then downgrade if persistent
+4. **Schema violation triggers repair** — one re-call, then downgrade
+5. **Double failure downgrades** — raw output preserved in audit for debugging
+6. **Audit record complete** — retrieval set, scores, gate, tokens, latency, model, repair flag
+
+## Query API
+
+`POST /query`
+
+**Request:**
+```json
+{ "question": "What is the maximum permanent link length?" }
+```
+
+**Response (answered):**
+```json
+{
+  "status": "answered",
+  "answer": "The horizontal permanent link is limited to 90 m...",
+  "citations": [
+    { "chunk_id": "c-37", "source": "doc.pdf", "page": 14, "snippet": "limited to 90 m" }
+  ],
+  "audit_id": "<uuid>"
+}
+```
+
+**Response (insufficient evidence):**
+```json
+{
+  "status": "insufficient_evidence",
+  "answer": "I don't have enough information in the provided documents to answer that.",
+  "citations": [],
+  "audit_id": "<uuid>"
+}
+```
 
 ## Re-ingest policy
 
@@ -156,6 +199,7 @@ On re-ingest of a **modified** document: **replace** (delete old chunks, insert 
 - Parent SRS/TDD: MICT-RAG-002 v1.0
 - Session S01: MICT-RAG-002-S01 (Deterministic Core)
 - Session S02: MICT-RAG-002-S02 (Ingest Pipeline)
+- **Session S03: MICT-RAG-002-S03 — Query Pipeline & Grounding Gate (Gemma)**
 
 ## License
 

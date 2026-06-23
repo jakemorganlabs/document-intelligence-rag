@@ -204,15 +204,16 @@ export async function annSearch(
   queryVector: number[],
   topK = 6,
   client: PoolClient | Client
-): Promise<Array<{ chunk_id: string; similarity: number; text: string; source: string }>> {
+): Promise<Array<{ chunk_id: string; similarity: number; text: string; source: string; page: number | null }>> {
   const literal = `[${queryVector.join(", ")}]`;
   const res = await client.query<{
     chunk_id: string;
     similarity: number;
     text: string;
     source: string;
+    page: number | null;
   }>(
-    `SELECT chunk_id, 1 - (embedding <=> $1::vector) AS similarity, text, source
+    `SELECT chunk_id, 1 - (embedding <=> $1::vector) AS similarity, text, source, page
      FROM chunks
      WHERE embedding IS NOT NULL
      ORDER BY embedding <=> $1::vector

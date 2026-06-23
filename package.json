@@ -24,6 +24,9 @@
     "ingest": "tsx scripts/ingest.ts",
     "ingest:smoke": "bash scripts/ingest_smoke.sh",
     "embed:pending": "tsx scripts/embed_pending.ts",
+    "query": "tsx scripts/query.ts",
+    "query:smoke": "bash scripts/query_smoke.sh",
+    "serve": "tsx src/server.ts",
     "lint": "eslint src/ tests/",
     "typecheck": "tsc --noEmit"
   },
@@ -38,6 +41,8 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
+    "@google/genai": "^2.9.0",
     "dotenv": "^16.4.0",
     "openai": "^6.44.0",
     "pg": "^8.14.0",

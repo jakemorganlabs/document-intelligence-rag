@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Required repository secrets (Settings > Secrets and variables > Actions):
+    # - GOOGLE_GENAI_API_KEY      (Google AI Studio key for Gemma generation)
+    # - EMBEDDING_PROVIDER_API_KEY (OpenAI key for text-embedding-3-small)
+    # - DATABASE_URL              (Postgres+pgvector connection string — optional for CI)
+    # - QUERY_SECRET              (HMAC secret for query auth — S05)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run unit tests (no live APIs)
+        run: npm test
+        env:
+          GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY || 'placeholder-skipped' }}
+          EMBEDDING_PROVIDER_API_KEY: ${{ secrets.EMBEDDING_PROVIDER_API_KEY || 'placeholder-skipped' }}
