@@ -118,12 +118,13 @@ describe("eval metrics", () => {
         },
       ];
 
+      const aLabel = labels[0]!;
       // k=1: only "x.pdf" is considered -> miss
-      const r1 = computeRecallAtK([labels[0]], results, 1);
+      const r1 = computeRecallAtK([aLabel], results, 1);
       expect(r1.recall).toBe(0);
 
       // k=2: "01.pdf" is in top-2 -> hit
-      const r2 = computeRecallAtK([labels[0]], results, 2);
+      const r2 = computeRecallAtK([aLabel], results, 2);
       expect(r2.recall).toBe(1);
     });
   });

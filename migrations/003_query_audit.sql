@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS query_audits (
     citations         JSONB NOT NULL DEFAULT '[]',
     model_id          TEXT,
     parameters        JSONB,
-    cache_read_tokens INT,
-    cache_write_tokens INT,
+    -- Gemma does not expose a prompt-caching API; token counts are recorded
+    -- in the token_counts JSONB field below.
     repair_used       BOOLEAN NOT NULL DEFAULT FALSE,
     latency_ms        INT,
     token_counts      JSONB,
