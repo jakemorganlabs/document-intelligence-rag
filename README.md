@@ -16,7 +16,7 @@ An answer it cannot cite is an answer it must not give.
 | **Generation (RAG answers)** | Google | `google/gemma-4-26B-A4B-it` |
 | **Embeddings** | OpenAI | `text-embedding-3-small` |
 
-Generation is pinned to **Google Gemma** — not Anthropic, Claude, or Haiku. See `config/generation.json` and `src/generation_config.ts`.
+Generation is pinned to **Google Gemma** (`google/gemma-4-26B-A4B-it`). See `config/generation.json` and `src/generation_config.ts`.
 
 ## What this session delivers
 
@@ -211,6 +211,10 @@ scripts/
 ## Re-ingest policy
 
 On re-ingest of a **modified** document: **replace** (delete old chunks, insert new — wrapped in a single transaction). This keeps the portfolio simple. Version tracking is listed under Risks as an alternative if requirements change.
+
+## Provider switch note
+
+The original TDD referenced Anthropic models and prompt-caching features. Those were removed before Session S03 because Anthropic was ending support for the Claude family in this project's usage tier. The system was switched entirely to **Google Gemma** (`google/gemma-4-26B-A4B-it`) via the `@google/genai` SDK. No Anthropic, Claude, or Haiku references remain in the active code, tests, or configuration.
 
 ## S04 Acceptance Criteria
 

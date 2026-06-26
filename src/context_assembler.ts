@@ -8,8 +8,9 @@
  * 4. Retrieved passages with chunk_id labels (variable suffix)
  * 5. The user question
  *
- * Note: On Gemma there is no explicit cache-breakpoint API (Anthropic-style cache_control).
- * Prefix stability is a prompt-engineering discipline; the stable portion is identical
+ * Note: Gemma does not expose a token-level cache-breakpoint API like some
+ * providers. Prefix stability is a prompt-engineering discipline; the stable
+ * portion is identical
  * on every call so the model runtime may cache it internally, but we do not rely on
  * provider-level token caching guarantees.
  */

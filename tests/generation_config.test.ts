@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   defaultGenerationConfig,
-  FORBIDDEN_GENERATION_MODEL_MARKERS,
+  VALID_GENERATION_MODEL_PREFIXES,
   GENERATION_MODEL_ID,
   loadGenerationConfig,
 } from "../src/generation_config.js";
@@ -9,34 +9,37 @@ import {
 describe("generation_config", () => {
   it("pins the generation model to Google Gemma", () => {
     expect(defaultGenerationConfig.provider).toBe("google");
-    expect(defaultGenerationConfig.model_id).toBe("google/gemma-4-26B-A4B-it");
+    expect(defaultGenerationConfig.model_id).toBe(
+      "google/gemma-4-26B-A4B-it"
+    );
     expect(GENERATION_MODEL_ID).toBe("google/gemma-4-26B-A4B-it");
   });
 
-  it("does not use Anthropic Claude or Haiku", () => {
+  it("accepts only google/gemma model prefixes", () => {
     const modelLower = defaultGenerationConfig.model_id.toLowerCase();
-    for (const marker of FORBIDDEN_GENERATION_MODEL_MARKERS) {
-      expect(modelLower).not.toContain(marker);
+    let matched = false;
+    for (const prefix of VALID_GENERATION_MODEL_PREFIXES) {
+      if (modelLower.startsWith(prefix)) matched = true;
     }
-    expect(defaultGenerationConfig.provider).not.toBe("anthropic");
+    expect(matched).toBe(true);
   });
 
-  it("rejects Anthropic provider overrides", () => {
+  it("rejects non-google provider overrides", () => {
     expect(() =>
       loadGenerationConfig({
-        provider: "anthropic" as "google",
-        model_id: "claude-3-5-haiku-20241022",
+        provider: "openai" as "google",
+        model_id: "gpt-4",
       })
     ).toThrow(/provider must be "google"/);
   });
 
-  it("rejects Haiku or Claude model overrides", () => {
+  it("rejects non-gemma model overrides", () => {
     expect(() =>
-      loadGenerationConfig({ model_id: "claude-3-5-haiku-20241022" })
+      loadGenerationConfig({ model_id: "gpt-4" })
     ).toThrow(/must be "google\/gemma-4-26B-A4B-it"/);
 
     expect(() =>
-      loadGenerationConfig({ model_id: "anthropic/claude-3-haiku" })
+      loadGenerationConfig({ model_id: "openai/gpt-4o" })
     ).toThrow(/must be "google\/gemma-4-26B-A4B-it"/);
   });
 });

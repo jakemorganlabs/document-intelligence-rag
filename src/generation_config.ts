@@ -2,7 +2,7 @@
  * Generation model configuration (§15, FR-AN-5, NFR-MA-2).
  *
  * This system uses Google Gemma for grounded answer generation.
- * Anthropic models (Claude, Haiku, etc.) are explicitly excluded.
+ * Provider is hard-coded to "google"; the model id is pinned and validated.
  */
 import generationDefaults from "../config/generation.json" with { type: "json" };
 
@@ -15,26 +15,20 @@ export interface GenerationConfig {
   structured_output: "json_mode";
 }
 
-/** Pinned generation model — Google Gemma, not Anthropic. */
+/** Pinned generation model — Google Gemma. */
 export const GENERATION_MODEL_ID = "google/gemma-4-26B-A4B-it" as const;
 
-/** Providers that must NOT be used for generation in this project. */
-export const FORBIDDEN_GENERATION_PROVIDERS = ["anthropic"] as const;
+/** Valid provider ids. */
+export const VALID_GENERATION_PROVIDERS = ["google"] as const;
 
-/** Model id substrings that must NOT appear in the generation config. */
-export const FORBIDDEN_GENERATION_MODEL_MARKERS = [
-  "anthropic",
-  "claude",
-  "haiku",
-  "sonnet",
-  "opus",
-] as const;
+/** Valid model id prefixes. */
+export const VALID_GENERATION_MODEL_PREFIXES = ["google/gemma"] as const;
 
 export function loadGenerationConfig(
   overrides?: Partial<GenerationConfig>
 ): GenerationConfig {
   const config: GenerationConfig = {
-    ...(generationDefaults as GenerationConfig),
+    ...(generationDefaults as unknown as GenerationConfig),
     ...overrides,
   };
   assertGenerationConfig(config);
@@ -44,7 +38,7 @@ export function loadGenerationConfig(
 export function assertGenerationConfig(config: GenerationConfig): void {
   if (config.provider !== "google") {
     throw new Error(
-      `Generation provider must be "google", got "${config.provider}". Anthropic is not supported.`
+      `Generation provider must be "google", got "${config.provider}".`
     );
   }
 
@@ -55,16 +49,21 @@ export function assertGenerationConfig(config: GenerationConfig): void {
   }
 
   const modelLower = config.model_id.toLowerCase();
-  for (const marker of FORBIDDEN_GENERATION_MODEL_MARKERS) {
-    if (modelLower.includes(marker)) {
-      throw new Error(
-        `Forbidden generation model marker "${marker}" found in model_id "${config.model_id}".`
-      );
+  let hasValidPrefix = false;
+  for (const prefix of VALID_GENERATION_MODEL_PREFIXES) {
+    if (modelLower.startsWith(prefix)) {
+      hasValidPrefix = true;
+      break;
     }
   }
+  if (!hasValidPrefix) {
+    throw new Error(
+      `Generation model must start with one of ${JSON.stringify(VALID_GENERATION_MODEL_PREFIXES)}, got "${config.model_id}".`
+    );
+  }
 
-  if ((FORBIDDEN_GENERATION_PROVIDERS as readonly string[]).includes(config.provider)) {
-    throw new Error(`Forbidden generation provider: ${config.provider}`);
+  if (!VALID_GENERATION_PROVIDERS.includes(config.provider)) {
+    throw new Error(`Invalid generation provider: ${config.provider}`);
   }
 }
 

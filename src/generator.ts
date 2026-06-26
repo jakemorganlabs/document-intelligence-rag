@@ -2,8 +2,7 @@
  * Generator — Google Gemma adapter for grounded answer generation (§10.8, FR-AN-1..5).
  *
  * Uses @google/genai with JSON mode (responseMimeType: application/json) and
- * a responseSchema to constrain output. Gemma does not support Anthropic-style
- * tool_choice forced function calling, so we rely on prompt discipline +
+ * a responseSchema to constrain output. Gemma relies on prompt discipline +
  * responseSchema + post-generation validation as the guarantee stack.
  *
  * Repair loop: exactly one corrective re-call on schema or citation failure.
