@@ -1,0 +1,111 @@
+import { describe, expect, it } from "vitest";
+import http from "http";
+import { buildServer } from "../src/server.js";
+import { signHmac } from "../src/auth.js";
+
+function post(
+  server: http.Server,
+  path: string,
+  body: string,
+  headers: Record<string, string> = {}
+): Promise<{ status: number; body: unknown }> {
+  return new Promise((resolve) => {
+    const addr = server.address() as { port: number };
+    const req = http.request(
+      { hostname: "localhost", port: addr.port, method: "POST", path, headers },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+        res.on("end", () => {
+          resolve({ status: res.statusCode ?? 0, body: data ? JSON.parse(data) : null });
+        });
+      }
+    );
+    req.on("error", (err) => resolve({ status: 0, body: { error: err.message } }));
+    req.write(body);
+    req.end();
+  });
+}
+
+describe("server auth (S05)", () => {
+  const secret = "server-test-secret";
+  const OLD_SECRET = process.env.QUERY_SECRET;
+
+  it("returns 401 when QUERY_SECRET is set but headers are missing", async () => {
+    process.env.QUERY_SECRET = secret;
+    const server = buildServer();
+    await new Promise<void>((r) => server.listen(0, r));
+
+    const res = await post(server, "/query", JSON.stringify({ question: "test" }));
+    expect(res.status).toBe(401);
+    expect((res.body as Record<string, unknown>).reason).toBe("missing_auth_header");
+
+    server.closeAllConnections?.();
+    server.close();
+    process.env.QUERY_SECRET = OLD_SECRET;
+  });
+
+  it("returns 401 when signature is invalid", async () => {
+    process.env.QUERY_SECRET = secret;
+    const server = buildServer();
+    await new Promise<void>((r) => server.listen(0, r));
+
+    const body = JSON.stringify({ question: "test" });
+    const now = Math.floor(Date.now() / 1000);
+    const badSig = signHmac("wrong-secret", now, body);
+
+    const res = await post(server, "/query", body, {
+      "X-Timestamp": String(now),
+      "X-Signature": badSig,
+    });
+    expect(res.status).toBe(401);
+    expect((res.body as Record<string, unknown>).reason).toBe("signature_mismatch");
+
+    server.closeAllConnections?.();
+    server.close();
+    process.env.QUERY_SECRET = OLD_SECRET;
+  });
+
+  it("returns 401 when timestamp is expired", async () => {
+    process.env.QUERY_SECRET = secret;
+    const server = buildServer();
+    await new Promise<void>((r) => server.listen(0, r));
+
+    const body = JSON.stringify({ question: "test" });
+    const old = Math.floor(Date.now() / 1000) - 400;
+    const sig = signHmac(secret, old, body);
+
+    const res = await post(server, "/query", body, {
+      "X-Timestamp": String(old),
+      "X-Signature": sig,
+    });
+    expect(res.status).toBe(401);
+    expect((res.body as Record<string, unknown>).reason).toBe("timestamp_expired");
+
+    server.closeAllConnections?.();
+    server.close();
+    process.env.QUERY_SECRET = OLD_SECRET;
+  });
+
+  it("returns 400 for a validly-signed but invalid JSON body", async () => {
+    process.env.QUERY_SECRET = secret;
+    const server = buildServer();
+    await new Promise<void>((r) => server.listen(0, r));
+
+    const body = "not json";
+    const now = Math.floor(Date.now() / 1000);
+    const sig = signHmac(secret, now, body);
+
+    const res = await post(server, "/query", body, {
+      "X-Timestamp": String(now),
+      "X-Signature": sig,
+    });
+    expect(res.status).toBe(400);
+
+    server.closeAllConnections?.();
+    server.close();
+    process.env.QUERY_SECRET = OLD_SECRET;
+  });
+});
