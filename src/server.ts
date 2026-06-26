@@ -1,17 +1,25 @@
 /**
- * Query endpoint — minimal HTTP server (§5.5, FR-ER-3).
+ * Query endpoint — minimal HTTP server (§5.5, FR-ER-3, NFR-SE-1).
  *
  * POST /query
+ * Headers: X-Timestamp, X-Signature
  * Body: { "question": "string" }
  * Returns: { status, answer, citations, audit_id }
  *
+ * Authentication: HMAC-SHA256 over (timestamp || body).
  * No open inbound ports in production; exposed via encrypted tunnel (§19).
- * Authentication deferred to S05.
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { queryDocument } from "./query.js";
+import { verifyHmac } from "./auth.js";
 
 const PORT = Number(process.env.PORT) || 3000;
+
+function getHeader(req: IncomingMessage, name: string): string | undefined {
+  const raw = req.headers[name.toLowerCase()];
+  if (Array.isArray(raw)) return raw[0];
+  return raw;
+}
 
 export function buildServer() {
   return createServer(async (req: IncomingMessage, res: ServerResponse) => {
@@ -26,6 +34,26 @@ export function buildServer() {
     let body = "";
     for await (const chunk of req) {
       body += chunk;
+    }
+
+    /* ---------- Auth gate (S05) ---------- */
+    const secret = process.env.QUERY_SECRET ?? "";
+    if (secret) {
+      const timestamp = getHeader(req, "X-Timestamp");
+      const signature = getHeader(req, "X-Signature");
+
+      const auth = verifyHmac({
+        timestamp: timestamp ?? "",
+        signature: signature ?? "",
+        body,
+        secret,
+      });
+
+      if (!auth.valid) {
+        res.writeHead(401);
+        res.end(JSON.stringify({ error: "Unauthorized", reason: auth.reason }));
+        return;
+      }
     }
 
     let question: string;

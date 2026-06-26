@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "effective_date": "2026-06-26",
+  "providers": [
+    {
+      "provider": "google",
+      "model": "google/gemma-4-26B-A4B-it",
+      "endpoint": "generateContent",
+      "input_price_per_mtok": 0.25,
+      "output_price_per_mtok": 0.50
+    },
+    {
+      "provider": "openai",
+      "model": "text-embedding-3-small",
+      "endpoint": "embeddings",
+      "input_price_per_mtok": 0.02
+    }
+  ],
+  "notes": [
+    "Gemma pricing via Google AI Studio (pro tier). Subject to change.",
+    "Embedding pricing via OpenAI API. Subject to change.",
+    "No prompt-caching discount on Gemma; prefix stability is prompt-engineering only.",
+    "If this file is older than 90 days, a runtime warning is emitted."
+  ]
+}
