@@ -1,0 +1,92 @@
+[
+  {
+    "id": "unans-001",
+    "question": "What is the warranty period on plenum-rated patch cords?",
+    "note": "Warranty periods are not discussed in any document."
+  },
+  {
+    "id": "unans-002",
+    "question": "What is the average cost per metre of OM4 fibre cable?",
+    "note": "Pricing information is not present in the corpus."
+  },
+  {
+    "id": "unans-003",
+    "question": "Which manufacturers produce Cat 8 connectors?",
+    "note": "Manufacturer brands are not mentioned."
+  },
+  {
+    "id": "unans-004",
+    "question": "How many employees does BICSI have?",
+    "note": "Organizational details about BICSI are not in corpus."
+  },
+  {
+    "id": "unans-005",
+    "question": "What year was the TIA-568 standard first published?",
+    "note": "Historical dates are not in corpus."
+  },
+  {
+    "id": "unans-006",
+    "question": "What colour should conduit be painted in data centres?",
+    "note": "Conduit colour coding is not specified."
+  },
+  {
+    "id": "unans-007",
+    "question": "What is the recommended battery backup runtime for a PoE switch?",
+    "note": "UPS or battery backup topics are not covered."
+  },
+  {
+    "id": "unans-008",
+    "question": "What is the licensing requirement for low-voltage cabling contractors in Ontario?",
+    "note": "Jurisdictional licensing requirements are not discussed."
+  },
+  {
+    "id": "unans-009",
+    "question": "What programming language is used in the access control panel firmware?",
+    "note": "Firmware or software details are not present."
+  },
+  {
+    "id": "unans-010",
+    "question": "What is the typical hourly labour rate for a data centre cabling technician?",
+    "note": "Labour rates are not in corpus."
+  },
+  {
+    "id": "unans-011",
+    "question": "How many绿色生态建筑 certifications exist globally?",
+    "note": "Green building certifications are completely off-topic."
+  },
+  {
+    "id": "unans-012",
+    "question": "What is the maximum transmission distance for Cat 9 cable?",
+    "note": "Cat 9 does not exist; the corpus never mentions it."
+  },
+  {
+    "id": "unans-013",
+    "question": "What VLAN configuration is recommended for surveillance camera networks?",
+    "note": "Network configuration topics like VLANs are not covered."
+  },
+  {
+    "id": "unans-014",
+    "question": "What is the weight capacity of a 42U server cabinet?",
+    "note": "Cabinet weight capacity is not specified."
+  },
+  {
+    "id": "unans-015",
+    "question": "What is the recommended cleaning solvent for fibre optic connectors?",
+    "note": "Cleaning procedures or solvents are not discussed."
+  },
+  {
+    "id": "unans-016",
+    "question": "What is the shipping weight of a standard ladder-type cable tray?",
+    "note": "Shipping or weight specifications are not in corpus."
+  },
+  {
+    "id": "unans-017",
+    "question": "What is the IP rating required for outdoor access control readers?",
+    "note": "IP ratings or weatherproofing standards for readers are not covered."
+  },
+  {
+    "id": "unans-018",
+    "question": "What is the recommended DNS server for surveillance network segments?",
+    "note": "Network architecture beyond physical cabling is not in corpus."
+  }
+]

@@ -1,0 +1,338 @@
+[
+  {
+    "id": "ans-001",
+    "question": "What is the maximum horizontal permanent link length for solid-conductor cabling?",
+    "category": "single-chunk",
+    "gold_sources": ["01_horizontal_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The horizontal permanent link is limited to 90 metres of solid-conductor cabling"]
+  },
+  {
+    "id": "ans-002",
+    "question": "What is the maximum total channel length including patch cords?",
+    "category": "single-chunk",
+    "gold_sources": ["01_horizontal_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["the total channel length must not exceed 100 metres"]
+  },
+  {
+    "id": "ans-003",
+    "question": "What category supports 10GBASE-T to 100 metres subject to alien-crosstalk mitigation?",
+    "category": "single-chunk",
+    "gold_sources": ["01_horizontal_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Cat 6A supports 10GBASE-T to 100 metres, subject to the 90-metre permanent-link limit and alien-crosstalk mitigation"]
+  },
+  {
+    "id": "ans-004",
+    "question": "How many outlets does TIA-568-D require per work area?",
+    "category": "single-chunk",
+    "gold_sources": ["01_horizontal_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["TIA-568-D requires a minimum of two outlets per work area"]
+  },
+  {
+    "id": "ans-005",
+    "question": "What is the maximum single-mode intra-building backbone distance?",
+    "category": "single-chunk",
+    "gold_sources": ["02_backbone_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["single-mode fibre, the intra-building backbone may reach 2,000 metres"]
+  },
+  {
+    "id": "ans-006",
+    "question": "What is the mandatory topology for commercial building cabling?",
+    "category": "single-chunk",
+    "gold_sources": ["02_backbone_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The hierarchical star is the mandatory topology for commercial building cabling"]
+  },
+  {
+    "id": "ans-007",
+    "question": "How far does OM4 support 40 Gbps?",
+    "category": "single-chunk",
+    "gold_sources": ["03_fiber_optic.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["OM4 extends 40 Gbps to 150 metres"]
+  },
+  {
+    "id": "ans-008",
+    "question": "What is the minimum bend radius for OM4 under no-load conditions?",
+    "category": "single-chunk",
+    "gold_sources": ["03_fiber_optic.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The minimum bend radius for OM4 is 30 mm under no-load conditions"]
+  },
+  {
+    "id": "ans-009",
+    "question": "What polish type is required for passive optical networks?",
+    "category": "single-chunk",
+    "gold_sources": ["03_fiber_optic.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["APC is required for passive optical networks and any WDM application"]
+  },
+  {
+    "id": "ans-010",
+    "question": "What is the maximum conduit fill for multiple cables?",
+    "category": "single-chunk",
+    "gold_sources": ["04_pathways_spaces.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Conduit fill for low-voltage communications cabling shall not exceed 40 percent"]
+  },
+  {
+    "id": "ans-011",
+    "question": "What is the maximum support spacing for ladder-type cable trays in standard installations?",
+    "category": "single-chunk",
+    "gold_sources": ["04_pathways_spaces.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Support spacing shall not exceed 2.4 metres for standard installations"]
+  },
+  {
+    "id": "ans-012",
+    "question": "What is the minimum size for the telecommunications bonding backbone conductor?",
+    "category": "single-chunk",
+    "gold_sources": ["05_grounding_bonding.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The telecommunications bonding backbone (TBB) shall be a 6 AWG copper conductor minimum"]
+  },
+  {
+    "id": "ans-013",
+    "question": "What is the maximum ground resistance from any TGB to the main electrical service ground?",
+    "category": "single-chunk",
+    "gold_sources": ["05_grounding_bonding.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The resistance from any TGB to the main electrical service ground shall not exceed 1 ohm"]
+  },
+  {
+    "id": "ans-014",
+    "question": "What is the minimum sleeve extension above and below a concrete slab for metallic sleeves?",
+    "category": "single-chunk",
+    "gold_sources": ["06_fire_stopping.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Metallic sleeves cast or core-drilled into concrete floors must extend 25 mm above and below the slab surface"]
+  },
+  {
+    "id": "ans-015",
+    "question": "What is the labelling format required by TIA-606-B?",
+    "category": "single-chunk",
+    "gold_sources": ["07_cable_management.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The identifier format is: BLD-FLR-TR-PORT"]
+  },
+  {
+    "id": "ans-016",
+    "question": "What is the minimum service loop length required at telecommunications rooms?",
+    "category": "single-chunk",
+    "gold_sources": ["07_cable_management.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["A service loop of 3 metres minimum shall be left at each telecommunications room end"]
+  },
+  {
+    "id": "ans-017",
+    "question": "What colour should patch cords be for critical or security circuits?",
+    "category": "single-chunk",
+    "gold_sources": ["07_cable_management.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["red for critical or security circuits"]
+  },
+  {
+    "id": "ans-018",
+    "question": "What is the Cat 6A insertion loss limit for the channel at 250 MHz?",
+    "category": "single-chunk",
+    "gold_sources": ["08_testing_certification.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["the insertion loss limit is 20.9 dB for the channel"]
+  },
+  {
+    "id": "ans-019",
+    "question": "How long does a full Cat 6A autotest take per link?",
+    "category": "single-chunk",
+    "gold_sources": ["08_testing_certification.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["requires approximately 12 seconds per link"]
+  },
+  {
+    "id": "ans-020",
+    "question": "How many watts can IEEE 802.3bt Type 4 deliver?",
+    "category": "single-chunk",
+    "gold_sources": ["09_poe_standards.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["IEEE 802.3bt Type 4 delivers up to 90 watts of DC power"]
+  },
+  {
+    "id": "ans-021",
+    "question": "What is the maximum cable temperature rise allowed at the centre of a PoE bundle?",
+    "category": "single-chunk",
+    "gold_sources": ["09_poe_standards.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Temperature rise at the bundle centre shall not exceed 10 degrees Celsius above ambient"]
+  },
+  {
+    "id": "ans-022",
+    "question": "What cable type is recommended for OSDP communication?",
+    "category": "single-chunk",
+    "gold_sources": ["10_access_control.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["OSDP operates over RS-485 with a recommended shielded 22 AWG pair"]
+  },
+  {
+    "id": "ans-023",
+    "question": "What is a typical electrified strike current draw at 12 VDC?",
+    "category": "single-chunk",
+    "gold_sources": ["10_access_control.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["A typical electrified strike draws 250 mA at 12 VDC"]
+  },
+  {
+    "id": "ans-024",
+    "question": "What is the end-of-line resistor value for door position monitoring loops?",
+    "category": "single-chunk",
+    "gold_sources": ["10_access_control.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["an end-of-line resistor, typically 1 kOhm"]
+  },
+  {
+    "id": "ans-025",
+    "question": "Approximately how much storage is needed for 90-day retention of 4K surveillance at 30 fps?",
+    "category": "single-chunk",
+    "gold_sources": ["11_surveillance_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["storage sizing is approximately 4 TB per camera"]
+  },
+  {
+    "id": "ans-026",
+    "question": "What is the maximum throughput supported by IP-over-coax extenders on RG-59?",
+    "category": "single-chunk",
+    "gold_sources": ["11_surveillance_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["support up to 100 Mbps over 300 metres of RG-59"]
+  },
+  {
+    "id": "ans-027",
+    "question": "What is the approximate indoor coverage area per Wi-Fi 6 access point in an open office?",
+    "category": "single-chunk",
+    "gold_sources": ["12_wireless_infrastructure.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["a Wi-Fi 6 access point provides coverage to approximately 500 square metres in open office environments"]
+  },
+  {
+    "id": "ans-028",
+    "question": "What is the theoretical aggregate throughput of Wi-Fi 7?",
+    "category": "single-chunk",
+    "gold_sources": ["12_wireless_infrastructure.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Theoretical aggregate throughput reaches 46 Gbps"]
+  },
+  {
+    "id": "ans-029",
+    "question": "What is the maximum passive HDMI 2.1 cable length for Ultra High Speed certification?",
+    "category": "single-chunk",
+    "gold_sources": ["13_audiovisual_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The maximum reliable passive HDMI 2.1 cable length is 3 metres"]
+  },
+  {
+    "id": "ans-030",
+    "question": "What is the maximum distance supported by HDBaseT?",
+    "category": "single-chunk",
+    "gold_sources": ["13_audiovisual_cabling.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The maximum distance for HDBaseT is 100 metres"]
+  },
+  {
+    "id": "ans-031",
+    "question": "What is the temperature rating for plenum cable under continuous load?",
+    "category": "single-chunk",
+    "gold_sources": ["14_plenum_riser.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Temperature rating for plenum cable is 75 degrees Celsius under continuous load"]
+  },
+  {
+    "id": "ans-032",
+    "question": "What standard do CMR cables comply with?",
+    "category": "single-chunk",
+    "gold_sources": ["14_plenum_riser.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Riser-rated cables (CMR) comply with UL 1666"]
+  },
+  {
+    "id": "ans-033",
+    "question": "How many rack units does a standard 19-inch equipment rack typically provide?",
+    "category": "single-chunk",
+    "gold_sources": ["15_data_centre.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Standard 19-inch equipment racks provide 42 to 48 rack units"]
+  },
+  {
+    "id": "ans-034",
+    "question": "What is the minimum cover depth for direct-burial cable in pedestrian areas?",
+    "category": "single-chunk",
+    "gold_sources": ["16_outside_plant.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["minimum cover depth of 600 mm in pedestrian areas"]
+  },
+  {
+    "id": "ans-035",
+    "question": "What is the minimum room size for a telecommunications room serving a single floor?",
+    "category": "single-chunk",
+    "gold_sources": ["17_telecom_room.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["A telecommunications room serving a single floor shall be a minimum of 3 metres by 3.6 metres"]
+  },
+  {
+    "id": "ans-036",
+    "question": "What is the minimum ceiling height for a telecommunications room?",
+    "category": "single-chunk",
+    "gold_sources": ["17_telecom_room.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Ceiling height shall be 2.7 metres minimum"]
+  },
+  {
+    "id": "ans-037",
+    "question": "What BICSI standard covers data centre design?",
+    "category": "single-chunk",
+    "gold_sources": ["18_bicsi_tia_overview.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["BICSI-007 covers data centre design and operations"]
+  },
+  {
+    "id": "ans-038",
+    "question": "What is the current TIA revision that introduced Cat 8?",
+    "category": "single-chunk",
+    "gold_sources": ["18_bicsi_tia_overview.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["TIA-568-D is the current revision, introducing Cat 8"]
+  },
+  {
+    "id": "ans-039",
+    "question": "What is the recommended minimum number of inner-ducts for a two-building campus link?",
+    "category": "single-chunk",
+    "gold_sources": ["16_outside_plant.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["A minimum of four 90 mm inner-ducts is recommended for a two-building link"]
+  },
+  {
+    "id": "ans-040",
+    "question": "What is the optimal mounting height range for data centre patch panels?",
+    "category": "single-chunk",
+    "gold_sources": ["15_data_centre.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["The recommended mounting height for patch panels is between 14 RU and 32 RU"]
+  },
+  {
+    "id": "ans-041",
+    "question": "What is the rack spacing requirement for rear access?",
+    "category": "single-chunk",
+    "gold_sources": ["17_telecom_room.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["Racks shall be spaced at minimum 900 mm apart for rear access"]
+  },
+  {
+    "id": "ans-042",
+    "question": "What does TIA-568-C.3 cover?",
+    "category": "single-chunk",
+    "gold_sources": ["18_bicsi_tia_overview.pdf"],
+    "gold_pages": [1],
+    "gold_snippets": ["TIA-568-C.3 covers optical fibre cabling components"]
+  }
+]

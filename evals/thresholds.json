@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "description": "Thresholds for MICT-RAG-002 S04 eval suite. Tune against labeled eval set.",
+  "recall_at_k": {
+    "k": 6,
+    "threshold": 0.70,
+    "description": "At least 70% of answerable questions must retrieve their gold chunk in top-k before the relevance gate."
+  },
+  "abstention": {
+    "false_answer_rate_max": 0.10,
+    "false_refusal_rate_max": 0.25,
+    "description": "FAR (answering when should abstain) <= 0.10; FAR-INV (abstaining when should answer) <= 0.25"
+  },
+  "citation_integrity": {
+    "threshold": 0.99,
+    "description": "At least 99% of emitted citations must verify deterministically. Near-1.0 expected by construction."
+  }
+}

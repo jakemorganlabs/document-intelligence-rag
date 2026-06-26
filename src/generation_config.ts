@@ -12,7 +12,7 @@ export interface GenerationConfig {
   model_id: string;
   temperature: number;
   max_tokens: number;
-  structured_output: "tool_use";
+  structured_output: "json_mode";
 }
 
 /** Pinned generation model — Google Gemma, not Anthropic. */

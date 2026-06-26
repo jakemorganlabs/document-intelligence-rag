@@ -88,4 +88,5 @@ export interface QueryAudit {
   gate_fired: "relevance" | "citation" | "none" | null;
   top_score: number | null;
   repair_used: boolean;
+  latency_ms: number;
 }

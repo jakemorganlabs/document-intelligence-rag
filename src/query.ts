@@ -25,6 +25,7 @@ import type { PoolClient } from "pg";
 import type {
   GroundedAnswer,
   QueryAudit,
+  RetrievedChunk,
 } from "../types/index.js";
 import generationConfig from "../config/generation.json" with { type: "json" };
 import groundedAnswerSchema from "../schemas/grounded_answer.schema.json" with { type: "json" };
@@ -42,6 +43,7 @@ export interface QueryOptions {
 export interface QueryResult {
   answer: GroundedAnswer;
   audit: QueryAudit;
+  retrieved: RetrievedChunk[];
 }
 
 export async function queryDocument(
@@ -82,7 +84,7 @@ export async function queryDocument(
       rawOutput: null,
     });
     if (ownClient) client.release();
-    return { answer: result, audit };
+    return { answer: result, audit, retrieved };
   }
 
   const surviving = gate1.surviving;
@@ -178,7 +180,7 @@ export async function queryDocument(
   });
 
   if (ownClient) client.release();
-  return { answer: finalAnswer, audit };
+  return { answer: finalAnswer, audit, retrieved };
 }
 
 // --- helper: write audit row ---

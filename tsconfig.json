@@ -27,6 +27,6 @@
       "@schemas/*": ["schemas/*"]
     }
   },
-  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "config/**/*", "schemas/**/*", "types/**/*"],
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "evals/**/*", "config/**/*", "schemas/**/*", "types/**/*"],
   "exclude": ["node_modules", "dist"]
 }

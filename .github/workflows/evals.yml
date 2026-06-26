@@ -1,0 +1,84 @@
+name: Eval Suite
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+
+    # Required secrets (see ci.yml):
+    # - GOOGLE_GENAI_API_KEY
+    # - EMBEDDING_PROVIDER_API_KEY
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: docintel_eval
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python sidecar dependencies
+        run: pip install -r sidecar/requirements.txt
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run migrations
+        run: npm run migrate:fresh
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/docintel_eval
+
+      # Eval runner relies on the API keys for embedding and generation.
+      # If keys are missing, the runner will still produce results for fixtures
+      # that trigger pre-generation abstention, but most answerable fixtures
+      # will error. Marking continues-on-error as a safety valve for now.
+      - name: Run eval suite
+        id: eval_run
+        run: |
+          npm run eval:clean
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/docintel_eval
+          GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
+          EMBEDDING_PROVIDER_API_KEY: ${{ secrets.EMBEDDING_PROVIDER_API_KEY }}
+        continue-on-error: true
+
+      - name: Upload eval report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: evals/report.md
+
+      - name: Upload raw results as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: evals/results.json

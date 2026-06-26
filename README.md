@@ -2,11 +2,12 @@
 
 Grounded retrieval-augmented generation with citations and deterministic abstention.
 
-**Portfolio Piece II · MICT-RAG-002 · Sessions S01 + S02 — Deterministic Core + Ingest Pipeline**
+**Portfolio Piece II · MICT-RAG-002 · Sessions S01–S04 — Grounded RAG with Citations & Eval Suite**
 
 An answer it cannot cite is an answer it must not give.
 
 [![CI](https://github.com/jakemorganlabs/document-intelligence-rag/actions/workflows/test.yml/badge.svg)](https://github.com/jakemorganlabs/document-intelligence-rag/actions/workflows/test.yml)
+[![Eval](https://github.com/jakemorganlabs/document-intelligence-rag/actions/workflows/evals.yml/badge.svg)](https://github.com/jakemorganlabs/document-intelligence-rag/actions/workflows/evals.yml)
 
 ## Model stack
 
@@ -120,6 +121,21 @@ tests/               Unit tests for all components
 fixtures/
   smoke_pdfs/        Synthetic PDFs for testing
   generate_smoke_pdfs.py
+evals/
+  run.ts              Eval runner: ingest corpus, run fixtures, collect results
+  report.ts           Markdown report generator with metrics + breakdowns
+  metrics/
+    recall.ts         recall@k metric implementation
+    abstention.ts     FAR / FAR-INV confusion matrix
+    citations.ts      Citation integrity (verified / emitted)
+  thresholds.json     Pass/fail thresholds for CI gate
+fixtures/eval_corpus/
+  pdfs/               19 synthetic eval PDFs (structured cabling domain)
+  questions/
+    answerable.json   42 labeled questions with gold chunk sources
+    unanswerable.json 18 questions with no corpus support
+    adversarial.json  15 injection / edge-case fixtures
+  generate_eval_pdfs.py  Corpus generator
 scripts/
   ingest.ts           CLI entry point for ingestion
   embed_pending.ts  Re-run un-embedded chunks
@@ -140,6 +156,8 @@ scripts/
 | `npm run ingest:smoke` | Run full S02 smoke test suite |
 | `npm run query -- "<question>"` | Run a single query via CLI |
 | `npm run query:smoke` | Run S03 query pipeline smoke test |
+| `npm run eval` | Run S04 eval suite (requires DB + API keys) |
+| `npm run eval:clean` | Drop DB, re-migrate, run full eval suite |
 | `npm run serve` | Start HTTP query endpoint on PORT |
 
 ## S02 Acceptance Criteria
@@ -194,12 +212,23 @@ scripts/
 
 On re-ingest of a **modified** document: **replace** (delete old chunks, insert new — wrapped in a single transaction). This keeps the portfolio simple. Version tracking is listed under Risks as an alternative if requirements change.
 
+## S04 Acceptance Criteria
+
+1. **19 eval PDFs ingested** — structured cabling/low-voltage standards domain, synthetic content
+2. **Labeled fixtures complete** — 42 answerable + 18 unanswerable + 15 adversarial in `fixtures/eval_corpus/questions/`
+3. **recall@k measured** — retriever quality quantified per-labeled-fixture
+4. **Abstention correctness measured** — FAR/FAR-INV confusion matrix from labeled data
+5. **Citation integrity measured** — deterministic verification of every emitted citation
+6. **Report generated** — `evals/report.md` produced with per-category breakdowns
+7. **CI gates on eval** — `.github/workflows/evals.yml` runs suite on every `main` push
+
 ## Spec references
 
 - Parent SRS/TDD: MICT-RAG-002 v1.0
 - Session S01: MICT-RAG-002-S01 (Deterministic Core)
 - Session S02: MICT-RAG-002-S02 (Ingest Pipeline)
-- **Session S03: MICT-RAG-002-S03 — Query Pipeline & Grounding Gate (Gemma)**
+- Session S03: MICT-RAG-002-S03 (Query Pipeline & Grounding Gate)
+- **Session S04: MICT-RAG-002-S04 — Eval Corpus & Suite (Gemma)**
 
 ## License
 
