@@ -9,6 +9,7 @@ import type { PoolClient } from "pg";
 import type { ChunkRecord } from "../types/index.js";
 import { insertDocument, updateDocumentStatus, insertChunks, deleteChunksByDocument } from "./db.js";
 import { insertDeadLetter } from "./db.js";
+import { sendSlackAlert } from "./alerts.js";
 
 export interface IngestRecord {
   source: string;
@@ -100,6 +101,7 @@ export async function replaceDocument(
 
 /**
  * Route a persistent failure into the dead-letter queue.
+ * Also triggers a Slack alert (best-effort; does not block on alert failure).
  */
 export async function routeToDeadLetter(
   client: PoolClient,
@@ -112,4 +114,13 @@ export async function routeToDeadLetter(
   }
 ): Promise<void> {
   await insertDeadLetter(client, opts);
+  // Best-effort alert; fire-and-forget
+  sendSlackAlert({
+    stage: opts.stage,
+    error: opts.error,
+    itemType: opts.itemType,
+  }).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error("Slack alert failed:", err instanceof Error ? err.message : String(err));
+  });
 }

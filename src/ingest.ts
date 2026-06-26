@@ -22,6 +22,7 @@ import { checkIdempotency } from "./idempotency.js";
 import { embedTexts, getEmbeddingConfigFromEnv } from "./embedder.js";
 import { persistIngest, replaceDocument, routeToDeadLetter } from "./vector_store.js";
 import type { ChunkInput, ChunkRecord } from "../types/index.js";
+import { logEvent } from "./log.js";
 
 export interface IngestOptions {
   /** If true, replace existing document when hash matches (default: skip). */
@@ -51,8 +52,12 @@ export async function ingestFile(
   client: PoolClient,
   options: IngestOptions = {}
 ): Promise<IngestResult> {
+  const traceId = crypto.randomUUID();
+  const startTotal = performance.now();
   const source = filePath;
   let extraction: ExtractionResult;
+
+  logEvent({ trace_id: traceId, stage: "ingest", status: "start", query_id: filePath });
 
   /* ---------- Step 1: Read bytes & hash ---------- */
   let buffer: Buffer;
@@ -60,6 +65,7 @@ export async function ingestFile(
     buffer = await readFile(filePath);
   } catch (err) {
     const msg = `Cannot read file: ${(err as Error).message}`;
+    logEvent({ trace_id: traceId, stage: "ingest", status: "error", error: msg });
     await routeToDeadLetter(client, {
       stage: "ingest",
       itemType: "document",
@@ -80,12 +86,16 @@ export async function ingestFile(
   }
 
   const contentHash = computeContentHash(buffer);
+  logEvent({ trace_id: traceId, stage: "ingest_hash", status: "success" });
 
   /* ---------- Step 2: Extract text via sidecar ---------- */
   try {
+    logEvent({ trace_id: traceId, stage: "ingest_extract", status: "start" });
     extraction = await extractFile(filePath);
+    logEvent({ trace_id: traceId, stage: "ingest_extract", status: "success" });
   } catch (err) {
     const msg = `Extraction failed: ${(err as Error).message}`;
+    logEvent({ trace_id: traceId, stage: "ingest_extract", status: "error", error: msg });
     await routeToDeadLetter(client, {
       stage: "ingest",
       itemType: "document",
@@ -108,6 +118,7 @@ export async function ingestFile(
   /* ---------- Step 3: Idempotency check ---------- */
   const idem = await checkIdempotency(contentHash, client);
   if (idem.action === "skip" && !options.replaceOnReingest) {
+    logEvent({ trace_id: traceId, stage: "ingest_idempotency", status: "success", error: "skipped" });
     return {
       documentId: idem.documentId ?? null,
       source,
@@ -121,6 +132,7 @@ export async function ingestFile(
   }
 
   /* ---------- Step 4: Chunk ---------- */
+  logEvent({ trace_id: traceId, stage: "ingest_chunk", status: "start" });
   const chunkInput: ChunkInput = {
     source: extraction.source,
     contentHash,
@@ -132,8 +144,10 @@ export async function ingestFile(
   };
 
   const chunks = chunkDocument(chunkInput);
+  logEvent({ trace_id: traceId, stage: "ingest_chunk", status: "success", total_tokens: chunks.reduce((sum, c) => sum + c.token_count, 0) });
 
   /* ---------- Step 5: Embed ---------- */
+  logEvent({ trace_id: traceId, stage: "ingest_embed", status: "start", total_tokens: chunks.length });
   const textsToEmbed = chunks.map((c) => c.text);
   const embedConfig = options.embedConfig ?? getEmbeddingConfigFromEnv();
   let failedTexts = new Set<string>();
@@ -153,6 +167,14 @@ export async function ingestFile(
     // No API key — record everything as un-embedded
     for (const t of textsToEmbed) failedTexts.add(t);
   }
+
+  logEvent({
+    trace_id: traceId,
+    stage: "ingest_embed",
+    status: failedTexts.size > 0 ? "failure" : "success",
+    total_tokens: chunks.length,
+    error: failedTexts.size > 0 ? `${failedTexts.size} chunks failed embedding` : undefined,
+  });
 
   /* ---------- Step 6: Build ChunkRecords ---------- */
   const chunkRecords: ChunkRecord[] = chunks.map((c) => {
@@ -178,6 +200,7 @@ export async function ingestFile(
   });
 
   /* ---------- Step 7: Persist ---------- */
+  logEvent({ trace_id: traceId, stage: "ingest_persist", status: "start" });
   let documentId: string;
   let finalStatus: IngestResult["status"] = "indexed";
 
@@ -191,6 +214,7 @@ export async function ingestFile(
     }
   } catch (err) {
     const msg = `Persistence failed: ${(err as Error).message}`;
+    logEvent({ trace_id: traceId, stage: "ingest_persist", status: "error", error: msg });
     await routeToDeadLetter(client, {
       stage: "ingest",
       itemType: "document",
@@ -210,9 +234,19 @@ export async function ingestFile(
     };
   }
 
+  const totalMs = Math.round(performance.now() - startTotal);
   if (failedTexts.size > 0) {
     finalStatus = "partial";
   }
+
+  logEvent({
+    trace_id: traceId,
+    stage: "ingest",
+    status: "success",
+    latency_ms: totalMs,
+    total_tokens: chunks.length,
+    error: finalStatus === "partial" ? `${failedTexts.size} chunks un-embedded` : undefined,
+  });
 
   return {
     documentId,
